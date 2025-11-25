@@ -35,11 +35,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Chrome
-        run: sudo apt-get install google-chrome-stable
-
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install chromium --with-deps
 
       - name: Run api_test
         id: api_test

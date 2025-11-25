@@ -50,6 +50,9 @@ classDiagram
     }
 ```
 Каждый метод тестировался только с валидными данными
+
+### Postman
+файл с postman коллекцией: `postman/NotesApp.postman_collection.json`
 ## Тестирование UI
 [Приложение](https://practice.expandtesting.com/notes/app)  
 

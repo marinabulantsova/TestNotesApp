@@ -1,0 +1,1411 @@
+{
+	"info": {
+		"_postman_id": "e42be3f3-6b95-491a-a4aa-4f7c49e0cb62",
+		"name": "NotesApp",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45583369"
+	},
+	"item": [
+		{
+			"name": "InboxMailslurp",
+			"item": [
+				{
+					"name": "Create inbox",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json()\r",
+									"pm.collectionVariables.set(\"INBOX_ID\", jsonData.id)\r",
+									"pm.collectionVariables.set(\"TEMP_USER_EMAIL\", jsonData.emailAddress)"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{MAILSLURP_API_KEY}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{MAILSLURP_BASE_URL}}/createInbox",
+							"host": [
+								"{{MAILSLURP_BASE_URL}}"
+							],
+							"path": [
+								"createInbox"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Wait latest email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"if (jsonData.body) {\r",
+									"    var resetToken = jsonData.body.trim().split('/').pop();\r",
+									"    resetToken = resetToken.trim();\r",
+									"    pm.collectionVariables.set(\"RESET_TOKEN\", resetToken);\r",
+									"    \r",
+									"} else {\r",
+									"    console.log(\"Тело письма пустое или ответ неверный\");\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{MAILSLURP_API_KEY}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{MAILSLURP_BASE_URL}}/waitForLatestEmail?inboxId={{INBOX_ID}}&timeout=30000&unreadOnly=true",
+							"host": [
+								"{{MAILSLURP_BASE_URL}}"
+							],
+							"path": [
+								"waitForLatestEmail"
+							],
+							"query": [
+								{
+									"key": "inboxId",
+									"value": "{{INBOX_ID}}"
+								},
+								{
+									"key": "timeout",
+									"value": "30000"
+								},
+								{
+									"key": "unreadOnly",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete inbox",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{MAILSLURP_API_KEY}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{MAILSLURP_BASE_URL}}/inboxes/{{INBOX_ID}}",
+							"host": [
+								"{{MAILSLURP_BASE_URL}}"
+							],
+							"path": [
+								"inboxes",
+								"{{INBOX_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Creates a new user account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check created user data\", function () {\r",
+									"    pm.expect(jsonData.data.email).to.eql(pm.collectionVariables.get(\"TEMP_USER_EMAIL\"));\r",
+									"    pm.expect(jsonData.data.name).to.eql(pm.collectionVariables.get(\"TEMP_USER_NAME\"));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "{{TEMP_USER_NAME}}",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "{{TEMP_USER_EMAIL}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{TEMP_USER_PASSWORD}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/users/register",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log in as an existing user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"TOKEN\", jsonData.data.token);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check user data\", function () {\r",
+									"    pm.expect(jsonData.data.email).to.eql(pm.collectionVariables.get(\"TEMP_USER_EMAIL\"));\r",
+									"    pm.expect(jsonData.data.name).to.eql(pm.collectionVariables.get(\"TEMP_USER_NAME\"));\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "{{TEMP_USER_EMAIL}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{TEMP_USER_PASSWORD}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/users/login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log in as an existing user Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"TOKEN\", jsonData.data.token);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check user data\", function () {\r",
+									"    pm.expect(jsonData.data.email).to.eql(pm.collectionVariables.get(\"TEMP_USER_EMAIL\"));\r",
+									"    pm.expect(jsonData.data.name).to.eql(pm.collectionVariables.get(\"TEMP_USER_NAME\"));\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "{{TEMP_USER_EMAIL}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{TEMP_USER_PASSWORD}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/users/login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve user profile information",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check user data\", function () {\r",
+									"    pm.expect(jsonData.data.email).to.eql(pm.collectionVariables.get(\"TEMP_USER_EMAIL\"));\r",
+									"    pm.expect(jsonData.data.name).to.eql(pm.collectionVariables.get(\"TEMP_USER_NAME\"));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/users/profile",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update the user profile information",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check updated user data\", function () {\r",
+									"    pm.expect(jsonData.data.phone).to.eql(pm.collectionVariables.get(\"TEMP_USER_PHONE\"));\r",
+									"    pm.expect(jsonData.data.name).to.eql(pm.collectionVariables.get(\"TEMP_USER_NAME\"));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "{{TEMP_USER_NAME}}",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "{{TEMP_USER_PHONE}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/users/profile",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send password reset link to user's email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "{{TEMP_USER_EMAIL}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/users/forgot-password",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify a password reset token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "{{RESET_TOKEN}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/users/verify-reset-password-token",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"verify-reset-password-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset a users's password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "{{RESET_TOKEN}}",
+									"type": "text"
+								},
+								{
+									"key": "newPassword",
+									"value": "{{TEMP_USER_NEW_PASSWORD}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/users/reset-password",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ghange a user's password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "currentPassword",
+									"value": "{{TEMP_USER_NEW_PASSWORD}}",
+									"type": "text"
+								},
+								{
+									"key": "newPassword",
+									"value": "{{TEMP_USER_NEW_PASSWORD2}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/users/change-password",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log out a user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/users/logout",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/users/delete-account",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"users",
+								"delete-account"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notes",
+			"item": [
+				{
+					"name": "Create a new note",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"NOTE_ID\", jsonData.data.id);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check created note data\", function () {\r",
+									"    pm.expect(jsonData.data.title).to.eql(pm.collectionVariables.get(\"NOTE_TITLE\"));\r",
+									"    pm.expect(jsonData.data.description).to.eql(pm.collectionVariables.get(\"NOTE_DESCRIPTION\"));\r",
+									"    pm.expect(jsonData.data.category).to.eql(pm.collectionVariables.get(\"NOTE_CATEGORY\"));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "title",
+									"value": "{{NOTE_TITLE}}",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "{{NOTE_DESCRIPTION}}",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "{{NOTE_CATEGORY}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/notes",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"notes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all notes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/notes",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"notes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a note by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check note data\", function () {\r",
+									"    pm.expect(jsonData.data.title).to.eql(pm.collectionVariables.get(\"NOTE_TITLE\"));\r",
+									"    pm.expect(jsonData.data.description).to.eql(pm.collectionVariables.get(\"NOTE_DESCRIPTION\"));\r",
+									"    pm.expect(jsonData.data.category).to.eql(pm.collectionVariables.get(\"NOTE_CATEGORY\"));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/notes/{{NOTE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"notes",
+								"{{NOTE_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update an existing note",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check note data\", function () {\r",
+									"    pm.expect(jsonData.data.title).to.eql(pm.collectionVariables.get(\"NEW_NOTE_TITLE\"));\r",
+									"    pm.expect(jsonData.data.description).to.eql(pm.collectionVariables.get(\"NEW_NOTE_DESCRIPTION\"));\r",
+									"    pm.expect(jsonData.data.category).to.eql(pm.collectionVariables.get(\"NEW_NOTE_CATEGORY\"));\r",
+									"    pm.expect(jsonData.data.completed).to.eql(JSON.parse(pm.collectionVariables.get(\"NOTE_COMPLETED\")));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "title",
+									"value": "{{NEW_NOTE_TITLE}}",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "{{NEW_NOTE_DESCRIPTION}}",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "{{NEW_NOTE_CATEGORY}}",
+									"type": "text"
+								},
+								{
+									"key": "completed",
+									"value": "{{NOTE_COMPLETED}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/notes/{{NOTE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"notes",
+								"{{NOTE_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update the completed status of a note",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check note status\", function () {\r",
+									"    pm.expect(jsonData.data.completed).to.eql(JSON.parse(pm.collectionVariables.get(\"NEW_NOTE_COMPLETED\")));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "completed",
+									"value": "{{NEW_NOTE_COMPLETED}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/notes/{{NOTE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"notes",
+								"{{NOTE_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a note by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-auth-token",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/notes/{{NOTE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"notes",
+								"{{NOTE_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "TEMP_USER_EMAIL",
+			"value": "ff80b3b2-931a-441d-ae40-ba9beacffac6@mailslurp.biz"
+		},
+		{
+			"key": "TEMP_USER_NAME",
+			"value": "temp_user"
+		},
+		{
+			"key": "TEMP_USER_PASSWORD",
+			"value": "123456"
+		},
+		{
+			"key": "BASE_URL",
+			"value": "https://practice.expandtesting.com/notes/api"
+		},
+		{
+			"key": "TOKEN",
+			"value": ""
+		},
+		{
+			"key": "MAILSLURP_BASE_URL",
+			"value": "https://api.mailslurp.com"
+		},
+		{
+			"key": "INBOX_ID",
+			"value": "ff80b3b2-931a-441d-ae40-ba9beacffac6"
+		},
+		{
+			"key": "RESET_TOKEN",
+			"value": ""
+		},
+		{
+			"key": "TEMP_USER_NEW_PASSWORD",
+			"value": "1234567"
+		},
+		{
+			"key": "TEMP_USER_NEW_PASSWORD2",
+			"value": "12345678"
+		},
+		{
+			"key": "NOTE_ID",
+			"value": "69204e7b18ce8c0299dc6b5d"
+		},
+		{
+			"key": "MAILSLURP_API_KEY",
+			"value": ""
+		},
+		{
+			"key": "TEMP_USER_PHONE",
+			"value": "79109109191"
+		},
+		{
+			"key": "NOTE_TITLE",
+			"value": "Title"
+		},
+		{
+			"key": "NOTE_DESCRIPTION",
+			"value": "Description"
+		},
+		{
+			"key": "NOTE_CATEGORY",
+			"value": "Home"
+		},
+		{
+			"key": "NEW_NOTE_TITLE",
+			"value": "new_title"
+		},
+		{
+			"key": "NEW_NOTE_DESCRIPTION",
+			"value": "new_description"
+		},
+		{
+			"key": "NEW_NOTE_CATEGORY",
+			"value": "Personal"
+		},
+		{
+			"key": "NOTE_COMPLETED",
+			"value": "false"
+		},
+		{
+			"key": "NEW_NOTE_COMPLETED",
+			"value": "true"
+		}
+	]
+}
