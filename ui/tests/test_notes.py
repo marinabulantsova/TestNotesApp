@@ -11,8 +11,6 @@ parameters_add_notes = [
     [False, True],  # Completed
 ]
 pairwise_combinations = list(AllPairs(parameters_add_notes))
-for pair in pairwise_combinations:
-    print(pair[0], pair[1], pair[2], pair[3])
 
 DATA_TITLE = {
     "valid": ("Title", ""),
@@ -33,10 +31,10 @@ DATA_DESCRIPTION = {
 class TestHomePage:
     @allure.story("Создание заметки")
     @pytest.mark.parametrize(
-        "category, completed, title, description",
+        "title, description, category, completed",
         [pytest.param(*pair, id=", ".join(map(str, pair))) for pair in pairwise_combinations]
     )
-    def test_add_note(self, home_page, category, completed, title, description, request):
+    def test_add_note(self, home_page, title, description, category, completed):
         allure.dynamic.title(f"Создание заметки: {category}, {completed}, {title}, {description}")
 
         with allure.step("Подготовка данных"):

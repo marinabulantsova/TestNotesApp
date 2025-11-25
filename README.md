@@ -271,3 +271,7 @@ stateDiagram-v2
 ![img.png](.github/assets/img_5.png)
 Запуск тестов: `pytest .\ui\tests\test_life_cycle_note.py -v`
 
+## GitHub Actions 
+- настроен запуск тестов с GitHub Actions
+- можно запустить тесты отдельно api и ui 
+- уведомление о выполнении приходит через телеграм бота с итоговым результатом и ссылкой на отчёт в Allure
