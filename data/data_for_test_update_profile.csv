@@ -1,0 +1,40 @@
+﻿;;;User name is required;;
+B;;;User name should be between 4 and 30 characters;;
+Ben;;;User name should be between 4 and 30 characters;;
+Mary;;;;;
+Maris;;;;;
+ktHKLqKriidJxnvpQQOEEuunAKgiC;;;;;
+nGxPQwNIujUYodIvEohMwJRhowWKPX;;;;;
+GAUkhclxbkwWhIWWAvuBCdcoGcoZqLB;;;User name should be between 4 and 30 characters;;
+VZkptJvvJZlABngyjaifLereqGWfqizGYDYWlXQUvuMFoVwNDP;;;User name should be between 4 and 30 characters;;
+Марина;;;;;
+12345;;;;;
+:!@#$&()[]_*;;;;;
+МариNa 123;;;;;
+Marina;1;;;Phone number should be between 8 and 20 digits;
+Marina;1234567;;;Phone number should be between 8 and 20 digits;
+Marina;12345678;;;;
+Marina;123456789;;;;
+Marina;7372006988109756058;;;;
+Marina;22216125935614810307;;;;
+Marina;056170115309741931948;;;Phone number should be between 8 and 20 digits;
+Marina;485991601342128900527276386511;;;Phone number should be between 8 and 20 digits;
+Marina;dhjskeldjd;;;Phone number should be between 8 and 20 digits;
+Marina;абвплыжуод;;;Phone number should be between 8 and 20 digits;
+Marina;123 123 123;;;Phone number should be between 8 and 20 digits;
+Marina;+9999999999;;;;
+Marina;99(890)9090;;;Phone number should be between 8 and 20 digits;
+Marina;99-910-90-90;;;Phone number should be between 8 and 20 digits;
+Marina;~[]()!@$%&*;;;Phone number should be between 8 and 20 digits;
+Marina;;B;;;company name should be between 4 and 30 characters
+Marina;;Ben;;;company name should be between 4 and 30 characters
+Marina;;Mary;;;
+Marina;;Maris;;;
+Marina;;ktHKLqKriidJxnvpQQOEEuunAKgiC;;;
+Marina;;nGxPQwNIujUYodIvEohMwJRhowWKPX;;;
+Marina;;GAUkhclxbkwWhIWWAvuBCdcoGcoZqLB;;;company name should be between 4 and 30 characters
+Marina;;VZkptJvvJZlABngyjaifLereqGWfqizGYDYWlXQUvuMFoVwNDP;;;company name should be between 4 and 30 characters
+Marina;;Марина;;;
+Marina;;12345;;;
+Marina;;:!@#$&()[]_*;;;
+Marina;;МариNa 123;;;

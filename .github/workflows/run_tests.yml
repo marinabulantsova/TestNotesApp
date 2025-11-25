@@ -1,0 +1,121 @@
+name: Automated Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: Choose scope
+        required: true
+        default: api_test
+        type: choice
+        options:
+          - api_test
+          - ui_test
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      MAILSLURP_API_KEY: ${{ secrets.MAILSLURP_API_KEY }}
+    outputs:
+      api_test: ${{ steps.api_test.outcome }}
+      ui_test: ${{ steps.ui_test.outcome }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Chrome
+        run: sudo apt-get install google-chrome-stable
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run api_test
+        id: api_test
+        if: github.event.inputs.test_scope == 'api_test'
+        run: pytest api/tests --alluredir=allure-results
+        continue-on-error: true
+
+      - name: Run ui_test
+        id: ui_test
+        if: github.event.inputs.test_scope == 'ui_test'
+        run: pytest ui/tests --alluredir=allure-results
+        continue-on-error: true
+
+      - name: Store allure results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+          retention-days: 1
+          overwrite: true
+
+  generate-report:
+    runs-on: ubuntu-latest
+    needs: test
+    name: Generate report
+    steps:
+      - name: Java install
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+
+      - name: Allure install
+        run: |
+          sudo wget https://github.com/allure-framework/allure2/releases/download/2.35.1/allure-2.35.1.tgz && \
+          sudo tar -zxvf allure-2.35.1.tgz -C /opt/ && \
+          sudo ln -s /opt/allure-2.35.1/bin/allure /usr/bin/allure
+
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Allure generate
+        run: allure generate -c allure-results -o _site
+
+      - name: Store allure report
+        uses: actions/upload-artifact@v4
+        with:
+          name: _site
+          path: _site
+          retention-days: 1
+
+  publish-report:
+    runs-on: ubuntu-latest
+    needs: [generate-report, test]
+    name: Report publication
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+
+      - name: Deploy to Github Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: send notification to Telegram (success)
+        if: needs.test.outputs.api_test != 'failure' && needs.test.outputs.ui_test != 'failure'
+        run: |
+          curl --location 'https://api.telegram.org/bot${{ secrets.BOT_TELEGRAM_TOKEN }}/sendMessage' \
+          --header 'Content-Type: application/json' \
+          --data '{ "chat_id": 1040685578, "text": "✅ Testing finished with success. Report is here: https://marinabulantsova.github.io/TestNotesApp/" }'
+
+      - name: send notification to Telegram (failure)
+        if: needs.test.outputs.api_test == 'failure' || needs.test.outputs.ui_test == 'failure'
+        run: |
+          curl --location 'https://api.telegram.org/bot${{ secrets.BOT_TELEGRAM_TOKEN }}/sendMessage' \
+          --header 'Content-Type: application/json' \
+          --data '{ "chat_id": 1040685578, "text": "❌ Testing finished with failure. Report is here: https://marinabulantsova.github.io/TestNotesApp/" }'
