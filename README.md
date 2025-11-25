@@ -275,4 +275,5 @@ stateDiagram-v2
 - настроен запуск тестов с GitHub Actions
 - можно запустить тесты отдельно api и ui 
 - уведомление о выполнении приходит через телеграм бота с итоговым результатом и ссылкой на [отчёт в Allure](https://marinabulantsova.github.io/TestNotesApp/)
+
 ![img_1.png](.github/assets/img_6.png)
