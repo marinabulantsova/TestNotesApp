@@ -1,4 +1,5 @@
 from api.endpoints.base_api import BaseApi
+import allure
 
 class NotesApi(BaseApi):
     def create_note(self, data):

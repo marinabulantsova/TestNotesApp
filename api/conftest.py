@@ -1,9 +1,10 @@
 import pytest
+import uuid
 from api.endpoints.auth_api import AuthApi
 from api.endpoints.notes_api import NotesApi
 from api.endpoints.profile_api import ProfileApi
 from mailslurp_client import Configuration, ApiClient, InboxControllerApi, WaitForControllerApi, EmailControllerApi
-from api.config import BASE_URL, TEMP_USER_EMAIL, TEMP_USER_PASSWORD, TEMP_USER_NAME, DATA_LOGIN, DATA_CREATE_NOTE
+from api.config import BASE_URL, TEMP_USER_PASSWORD, TEMP_USER_NAME, DATA_LOGIN, DATA_CREATE_NOTE
 from dotenv import load_dotenv
 import os
 
@@ -17,6 +18,10 @@ def auth_token():
     yield response.json()["data"]["token"]
     auth_api.logout()
 
+@pytest.fixture(scope="session")
+def notes_api(auth_token):
+    return NotesApi(BASE_URL, auth_token)
+
 @pytest.fixture(scope="function")
 def note_id(auth_token):
     notes_api = NotesApi(BASE_URL, auth_token)
@@ -28,9 +33,8 @@ def note_id(auth_token):
 @pytest.fixture(scope="function")
 def temp_user():
     auth_api = AuthApi(BASE_URL)
-
     name = TEMP_USER_NAME
-    email = TEMP_USER_EMAIL
+    email = f"temp_user_{uuid.uuid4().hex[:6]}@gmail.com"
     password = TEMP_USER_PASSWORD
 
     register_response = auth_api.register({"name": name, "email": email, "password": password})
@@ -40,11 +44,14 @@ def temp_user():
     user_data = { "email": email, "name": name, "password": password, "token": token}
     yield user_data
 
-    response = auth_api.login({"email": user_data["email"], "password": user_data["password"]})
-    if response.status_code == 200:
-        new_token = response.json()["data"]["token"]
-        profile_api = ProfileApi(BASE_URL, new_token)
-        profile_api.delete_profile()
+    try:
+        response = auth_api.login({"email": user_data["email"], "password": user_data["password"]})
+        if response.status_code == 200:
+            new_token = response.json()["data"]["token"]
+            profile_api = ProfileApi(BASE_URL, new_token)
+            profile_api.delete_profile()
+    except Exception as e:
+        print(f"Не удалось удалить пользователя: {e}")
 
 @pytest.fixture(scope="session")
 def mailslurp_client():
@@ -69,9 +76,12 @@ def temp_user_with_inbox(mailslurp_client):
     user_data = {"name": name, "email": email, "password": password, "token": token, "inbox_id": inbox.id}
     yield user_data
 
-    response = auth_api.login({"email": user_data["email"], "password": user_data["password"]})
-    if response.status_code == 200:
-        new_token = response.json()["data"]["token"]
-        profile_api = ProfileApi(BASE_URL, new_token)
-        profile_api.delete_profile()
+    try:
+        response = auth_api.login({"email": user_data["email"], "password": user_data["password"]})
+        if response.status_code == 200:
+            new_token = response.json()["data"]["token"]
+            profile_api = ProfileApi(BASE_URL, new_token)
+            profile_api.delete_profile()
+    except Exception as e:
+        print(f"Не удалось удалить пользователя: {e}")
     inbox_api.delete_inbox(inbox.id)

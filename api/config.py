@@ -1,7 +1,6 @@
 BASE_URL = "https://practice.expandtesting.com/notes/api"
 
 TEMP_USER_NAME = "temp_user"
-TEMP_USER_EMAIL = "temp_user@gmail.com"
 TEMP_USER_PASSWORD = "123456"
 TEMP_USER_NEW_PASSWORD = "1234567"
 
