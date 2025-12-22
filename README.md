@@ -1,4 +1,4 @@
-# Демо-проект по тестированию API и UI Приложения с заметками
+# Проект по тестированию API и UI Приложения с заметками
 ## Тестирование API
 [Swagger Docs](https://practice.expandtesting.com/notes/api/api-docs/#/)  
 Схема тестирования API
